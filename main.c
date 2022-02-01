@@ -77,7 +77,8 @@ int main(void)
 			WINDOW_W, WINDOW_H);
 	cairo_xlib_surface_set_size(sfc, WINDOW_W, WINDOW_H);
 	cairo_t *ctx = cairo_create(sfc);
-	cairo_set_source_rgba(ctx, 0, 0, 1, 0.2);
+	cairo_surface_t *img = cairo_image_surface_create_from_png("satania.png");
+	cairo_set_source_surface(ctx, img, 0, 0);
 	cairo_paint(ctx);
 	
 	cairo_destroy(ctx);
@@ -93,6 +94,7 @@ int main(void)
 	}
 
 	cairo_surface_destroy(sfc);
+	cairo_surface_destroy(img);
 	XDestroyWindow(dpy, w);
 	XCloseDisplay(dpy);
 }
