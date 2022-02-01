@@ -10,8 +10,8 @@
  *  actions
  */
 
-#define WINDOW_W 144
-#define WINDOW_H 288
+#define WINDOW_W 75
+#define WINDOW_H 227
 
 int mouse_drag;
 int dragx, dragy;
