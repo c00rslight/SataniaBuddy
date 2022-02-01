@@ -1,8 +1,8 @@
 BIN=satania
 CC=gcc
-CFLAGS=-O2 -I/usr/local/include
+CFLAGS=-O2 `pkg-config --cflags x11 cairo`
 OBJ=main.o
-LDFLAGS=-lX11
+LDFLAGS=`pkg-config --libs x11 cairo`
 DEPS=Makefile
 
 all: $(BIN)

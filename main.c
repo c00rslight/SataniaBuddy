@@ -1,23 +1,25 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/Xrender.h>
+#include <cairo/cairo.h>
+#include <cairo/cairo-xlib.h>
 
 /*
  * TODO
- *  opengl
+ *  opengl (?)
  *  satania
  *  movement
  *  actions
  */
 
-#define WINDOW_W 72
-#define WINDOW_H 128
+#define WINDOW_W 144
+#define WINDOW_H 288
 
 int mouse_drag;
 int dragx, dragy;
 int deskw, deskh;
 
-void handle_mousemotion(XEvent *xe, Display* dpy, Window w)
+void handle_mousemotion(XEvent *xe, Display *dpy, Window w)
 {
 	if (!mouse_drag) return;
 
@@ -54,18 +56,12 @@ int main(void)
 
 	attr.colormap =
 		XCreateColormap(dpy, DefaultRootWindow(dpy), vinfo.visual, AllocNone);
-	attr.background_pixel = XWhitePixel(dpy, DefaultScreen(dpy)); // placeholder
 	attr.override_redirect = True;
 
 	Window w = XCreateWindow(dpy, XDefaultRootWindow(dpy), 0, 0,
 			WINDOW_W, WINDOW_H, 0, vinfo.depth, InputOutput, vinfo.visual,
 			CWColormap | CWBorderPixel | CWBackPixel | CWOverrideRedirect,
 			&attr);
-
-	long value = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
-
-	XChangeProperty(dpy, w, XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False),
-			XA_ATOM, 32, PropModeReplace, (unsigned char*)&value, 1);
 
 	Screen *screen = ScreenOfDisplay(dpy, DefaultScreen(dpy));
 	deskw = screen->width;
@@ -76,6 +72,15 @@ int main(void)
 
 	XMapWindow(dpy, w);
 	XSync(dpy, w);
+
+	cairo_surface_t *sfc = cairo_xlib_surface_create(dpy, w, vinfo.visual,
+			WINDOW_W, WINDOW_H);
+	cairo_xlib_surface_set_size(sfc, WINDOW_W, WINDOW_H);
+	cairo_t *ctx = cairo_create(sfc);
+	cairo_set_source_rgba(ctx, 0, 0, 1, 0.2);
+	cairo_paint(ctx);
+	
+	cairo_destroy(ctx);
 	
 	while (run) {
 		XEvent xe;
@@ -87,6 +92,7 @@ int main(void)
 		}
 	}
 
+	cairo_surface_destroy(sfc);
 	XDestroyWindow(dpy, w);
 	XCloseDisplay(dpy);
 }
