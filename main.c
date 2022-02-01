@@ -6,8 +6,6 @@
 
 /*
  * TODO
- *  opengl (?)
- *  satania
  *  movement
  *  actions
  */
@@ -81,7 +79,7 @@ int main(void)
 	cairo_set_source_surface(ctx, img, 0, 0);
 	cairo_paint(ctx);
 	
-	cairo_destroy(ctx);
+	cairo_destroy(ctx); // move to end when we start doing animation
 	
 	while (run) {
 		XEvent xe;
