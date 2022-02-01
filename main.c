@@ -22,6 +22,7 @@
 
 int MoveIntervalStart;
 int MoveIntervalStop;
+int Move;
 
 int mouse_drag;
 int dragx, dragy;
@@ -58,7 +59,7 @@ int start_move;
 void move(Display *dpy, Window w)
 {
 	if (mouse_drag) { start_move = 0; return; }
-	else if (!start_move) return;
+	else if (!start_move || !Move) return;
 
 	int newx = rand() % (deskw - WINDOW_W);
 	int newy = rand() % (deskh - WINDOW_H);
@@ -82,6 +83,7 @@ void read_config()
 	// this should be able to be called from satania's right click menu
 	
 	// set defaults
+	Move = 1;
 	MoveIntervalStart = 1;
 	MoveIntervalStop  = 2;
 	
@@ -93,10 +95,15 @@ void read_config()
 		char *value = str;
 		char* key = strsep(&value, "=");
 		if (key == NULL) continue;
+
 		if (strcmp(key, "MoveIntervalStart") == 0)
 			MoveIntervalStart = atoi(value);
 		else if (strcmp(key, "MoveIntervalStop") == 0)
 			MoveIntervalStop = atoi(value);
+		else if (strcmp(key, "Move") == 0) {
+			if (strcasecmp(value, "true\n") == 0) Move = 1;
+			else Move = 0;
+		}
 	}
 
 	free(str);
