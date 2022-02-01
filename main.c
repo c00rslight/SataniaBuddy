@@ -7,17 +7,21 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 /*
  * TODO
+ *  search for files in other locations, not just the current directory
  *  movement
  *  actions
  */
 
 #define WINDOW_W 75
 #define WINDOW_H 227
-#define MOVE_INTERVAL_START 1
-#define MOVE_INTERVAL_STOP 2
+
+int MoveIntervalStart;
+int MoveIntervalStop;
 
 int mouse_drag;
 int dragx, dragy;
@@ -66,15 +70,43 @@ void move(Display *dpy, Window w)
 void *move_thread(void *p)
 {
 	for (;;) {
-		int sleep_amt = (rand() % (MOVE_INTERVAL_STOP - MOVE_INTERVAL_START
-					+ 1)) + MOVE_INTERVAL_START;
+		int sleep_amt = (rand() % (MoveIntervalStop - MoveIntervalStart
+					+ 1)) + MoveIntervalStart;
 		sleep(sleep_amt);
 		start_move = 1;
 	}
 }
 
+void read_config()
+{
+	// this should be able to be called from satania's right click menu
+	
+	// set defaults
+	MoveIntervalStart = 1;
+	MoveIntervalStop  = 2;
+	
+	FILE *fp = fopen("satania.cfg", "r");
+	if (!fp) return;
+	char *str = malloc(1024);
+
+	while (fgets(str, 1024, fp) != NULL) {
+		char *value = str;
+		char* key = strsep(&value, "=");
+		if (key == NULL) continue;
+		if (strcmp(key, "MoveIntervalStart") == 0)
+			MoveIntervalStart = atoi(value);
+		else if (strcmp(key, "MoveIntervalStop") == 0)
+			MoveIntervalStop = atoi(value);
+	}
+
+	free(str);
+	fclose(fp);
+}
+
 int main(void)
 {
+	read_config();
+
 	int run = 1;
 
 	time_t t;

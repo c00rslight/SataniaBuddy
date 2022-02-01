@@ -1,9 +1,11 @@
 BIN=satania
 CC=gcc
-CFLAGS=-O2 `pkg-config --cflags x11 cairo pthread-stubs`
+CFLAGS=-O2 `pkg-config --cflags x11 cairo`
 OBJ=main.o
-LDFLAGS=`pkg-config --libs x11 cairo pthread-stubs`
+LDFLAGS=`pkg-config --libs x11 cairo`
 DEPS=Makefile
+
+.PHONY: run
 
 all: $(BIN)
 
