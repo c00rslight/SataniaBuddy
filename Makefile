@@ -1,8 +1,8 @@
 BIN=satania
 CC=gcc
-CFLAGS=-O2 `pkg-config --cflags x11 cairo`
+CFLAGS=-O2 `pkg-config --cflags x11 cairo pthread-stubs`
 OBJ=main.o
-LDFLAGS=`pkg-config --libs x11 cairo`
+LDFLAGS=`pkg-config --libs x11 cairo pthread-stubs`
 DEPS=Makefile
 
 all: $(BIN)

@@ -3,6 +3,10 @@
 #include <X11/extensions/Xrender.h>
 #include <cairo/cairo.h>
 #include <cairo/cairo-xlib.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <stdlib.h>
 
 /*
  * TODO
@@ -12,6 +16,8 @@
 
 #define WINDOW_W 75
 #define WINDOW_H 227
+#define MOVE_INTERVAL_START 1
+#define MOVE_INTERVAL_STOP 2
 
 int mouse_drag;
 int dragx, dragy;
@@ -43,9 +49,36 @@ void handle_btn_up(XEvent *xe)
 	if (xe->xbutton.button == Button1) mouse_drag = 0;
 }
 
+int start_move;
+
+void move(Display *dpy, Window w)
+{
+	if (mouse_drag) { start_move = 0; return; }
+	else if (!start_move) return;
+
+	int newx = rand() % (deskw - WINDOW_W);
+	int newy = rand() % (deskh - WINDOW_H);
+	XMoveWindow(dpy, w, newx, newy);
+
+	start_move = 0;
+}
+
+void *move_thread(void *p)
+{
+	for (;;) {
+		int sleep_amt = (rand() % (MOVE_INTERVAL_STOP - MOVE_INTERVAL_START
+					+ 1)) + MOVE_INTERVAL_START;
+		sleep(sleep_amt);
+		start_move = 1;
+	}
+}
+
 int main(void)
 {
 	int run = 1;
+
+	time_t t;
+	srand(time(&t));
 
 	XSetWindowAttributes attr = {0};
 	Display *dpy = XOpenDisplay(NULL);
@@ -81,13 +114,39 @@ int main(void)
 	
 	cairo_destroy(ctx); // move to end when we start doing animation
 	
+	int x11_fd = ConnectionNumber(dpy);
+	fd_set in_fds;
+	struct timeval tv, before, after, result;
+	tv.tv_sec = 0;
+	tv.tv_usec = 4000; // needs high fps or we cant keep up with the mouse
+
+	pthread_t thread_id;
+	pthread_create(&thread_id, NULL, move_thread, NULL);
+
 	while (run) {
+		gettimeofday(&before, NULL);
+
 		XEvent xe;
-		XNextEvent(dpy, &xe);
-		switch (xe.type) {
-			case ButtonPress: handle_btn_down(&xe); break;
-			case ButtonRelease: handle_btn_up(&xe); break;
-			case MotionNotify: handle_mousemotion(&xe, dpy, w); break;
+		FD_ZERO(&in_fds);
+		FD_SET(x11_fd, &in_fds);
+		int fds = select(x11_fd+1, &in_fds, NULL, NULL, &tv);
+		while (XPending(dpy)) {
+			XNextEvent(dpy, &xe);
+			switch (xe.type) {
+				case ButtonPress: handle_btn_down(&xe); break;
+				case ButtonRelease: handle_btn_up(&xe); break;
+				case MotionNotify: handle_mousemotion(&xe, dpy, w); break;
+			}
+		}
+
+		move(dpy, w);
+
+		if (fds > 0) {
+			gettimeofday(&after, NULL);
+			timersub(&after, &before, &result);
+			unsigned long sleep_time = tv.tv_usec -
+				(1000000 * result.tv_sec + result.tv_usec);
+			if (sleep_time <= tv.tv_usec) usleep(sleep_time);
 		}
 	}
 
