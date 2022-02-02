@@ -31,14 +31,14 @@ void do_move_window(Display *dpy, Window w)
 	XWindowAttributes eligible_attrs[n_children];
 	int el = 0;
 
-	for (int i = 0; i < n_children; children++, i++) {
+	for (int i = 0; i < n_children; i++) {
 		XWindowAttributes xwa;
-		XGetWindowAttributes(dpy, *children, &xwa);
+		XGetWindowAttributes(dpy, children[i], &xwa);
 		if (xwa.map_state == IsViewable && !xwa.override_redirect
 				&& xwa.x + window_w <= deskw &&
 				xwa.y-SitY + window_h <= deskh && xwa.x > 0 && xwa.y-SitY > 0) {
 			eligible_attrs[el] = xwa;
-			eligible[el++] = *children;
+			eligible[el++] = children[i];
 		}
 	}
 
