@@ -9,3 +9,5 @@ extern int MoveIntervalStart;
 extern int MoveIntervalStop;
 extern int Move;
 extern int SitY;
+extern int MoveRandom;
+extern int MoveWindow;

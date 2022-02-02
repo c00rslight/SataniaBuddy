@@ -24,6 +24,8 @@ int MoveIntervalStart;
 int MoveIntervalStop;
 int Move;
 int SitY;
+int MoveRandom;
+int MoveWindow;
 
 /*
  * TODO
@@ -41,6 +43,8 @@ void read_config()
 	MoveIntervalStart = 1;
 	MoveIntervalStop  = 2;
 	SitY = 148;
+	MoveRandom = 1;
+	MoveWindow = 1;
 	
 	FILE *fp = fopen("satania.cfg", "r");
 	if (!fp) return;
@@ -61,10 +65,28 @@ void read_config()
 		}
 		else if (strcmp(key, "SitY") == 0)
 			SitY = atoi(value);
+		else if (strcmp(key, "MoveRandom") == 0) {
+			if (strcasecmp(value, "true\n") == 0) MoveRandom = 1;
+			else MoveRandom = 0;
+		}
+		else if (strcmp(key, "MoveWindow") == 0) {
+			if (strcasecmp(value, "true\n") == 0) MoveWindow = 1;
+			else MoveWindow = 0;
+		}
 	}
 
 	free(str);
 	fclose(fp);
+}
+
+int error_handler(Display *dpy, XErrorEvent *e)
+{
+	if (e->error_code == 3) {
+		state = state_sit;
+		return 0;
+	}
+	printf("X Error: %d\n", e->error_code);
+	return 1;
 }
 
 int main(void)
@@ -75,6 +97,8 @@ int main(void)
 
 	time_t t;
 	srand(time(&t));
+
+	XSetErrorHandler(error_handler);
 
 	XSetWindowAttributes attr = {0};
 	Display *dpy = XOpenDisplay(NULL);

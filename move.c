@@ -42,7 +42,11 @@ void do_move_window(Display *dpy, Window w)
 		}
 	}
 
-	if (el == 0) { XFree(children); do_move_random(dpy, w); return; }
+	if (el == 0) {
+		XFree(children);
+		if (MoveRandom) do_move_random(dpy, w);
+		return;
+	}
 
 	int winn = rand() % el;
 	Window move_win = eligible[winn];
@@ -63,8 +67,8 @@ void move(Display *dpy, Window w)
 
 	int move_type = rand() % max_value;
 	switch (move_type) {
-		case move_random: do_move_random(dpy, w); break;
-		case move_window: do_move_window(dpy, w); break; 
+		case move_random: if (MoveRandom) do_move_random(dpy, w); break;
+		case move_window: if (MoveWindow) do_move_window(dpy, w); break; 
 	} // config file should be able to toggle which of these satania can do
 
 	start_move = 0;

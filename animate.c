@@ -10,7 +10,10 @@ void goto_window(Display *dpy, Window w)
 {
 	if (mouse_drag) { state = state_sit; return; }
 	XWindowAttributes xwa;
-	XGetWindowAttributes(dpy, sit_window, &xwa);
+	if (!XGetWindowAttributes(dpy, sit_window, &xwa)) {
+		state = state_sit;
+		return;
+	}
 	XMoveWindow(dpy, w, xwa.x, xwa.y-SitY);
 }
 
