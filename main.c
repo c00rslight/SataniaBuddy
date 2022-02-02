@@ -17,8 +17,8 @@
  *  actions
  */
 
-#define WINDOW_W 75
-#define WINDOW_H 227
+int window_h;
+int window_w;
 
 int MoveIntervalStart;
 int MoveIntervalStop;
@@ -61,8 +61,8 @@ void move(Display *dpy, Window w)
 	if (mouse_drag) { start_move = 0; return; }
 	else if (!start_move || !Move) return;
 
-	int newx = rand() % (deskw - WINDOW_W);
-	int newy = rand() % (deskh - WINDOW_H);
+	int newx = rand() % (deskw - window_w);
+	int newy = rand() % (deskh - window_h);
 	XMoveWindow(dpy, w, newx, newy);
 
 	start_move = 0;
@@ -128,8 +128,16 @@ int main(void)
 		XCreateColormap(dpy, DefaultRootWindow(dpy), vinfo.visual, AllocNone);
 	attr.override_redirect = True;
 
+	cairo_surface_t *img = cairo_image_surface_create_from_png("satania.png");
+	cairo_t *ictx = cairo_create(img);
+	double x1, x2, y1, y2;
+	cairo_clip_extents(ictx, &x1, &y1, &x2, &y2);
+	cairo_destroy(ictx);
+	window_w = x2 - x1;
+	window_h = y2 - y1;
+
 	Window w = XCreateWindow(dpy, XDefaultRootWindow(dpy), 0, 0,
-			WINDOW_W, WINDOW_H, 0, vinfo.depth, InputOutput, vinfo.visual,
+			window_w, window_h, 0, vinfo.depth, InputOutput, vinfo.visual,
 			CWColormap | CWBorderPixel | CWBackPixel | CWOverrideRedirect,
 			&attr);
 
@@ -144,10 +152,9 @@ int main(void)
 	XSync(dpy, w);
 
 	cairo_surface_t *sfc = cairo_xlib_surface_create(dpy, w, vinfo.visual,
-			WINDOW_W, WINDOW_H);
-	cairo_xlib_surface_set_size(sfc, WINDOW_W, WINDOW_H);
+			window_w, window_h);
+	cairo_xlib_surface_set_size(sfc, window_w, window_h);
 	cairo_t *ctx = cairo_create(sfc);
-	cairo_surface_t *img = cairo_image_surface_create_from_png("satania.png");
 	cairo_set_source_surface(ctx, img, 0, 0);
 	cairo_paint(ctx);
 	
