@@ -16,3 +16,6 @@ $(BIN): $(OBJ)
 
 run: $(BIN)
 	./$(BIN)
+
+clean:
+	rm satania *.o

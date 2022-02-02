@@ -3,6 +3,7 @@
 dependencies: X11, cairo (plus development libraries)  
 compile: make  
 run: make run  
+clean: make clean
 
 Config:  
 currently config file location is ./satania.cfg  
