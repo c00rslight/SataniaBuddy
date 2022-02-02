@@ -1,7 +1,7 @@
 #include <X11/Xlib.h>
 #include "animate.h"
 #include "main.h"
-#include "drag.h"
+#include "mouse.h"
 
 int state;
 Window sit_window;

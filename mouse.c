@@ -1,5 +1,5 @@
 #include <X11/Xlib.h>
-#include "drag.h"
+#include "mouse.h"
 
 int mouse_drag;
 int dragx, dragy;

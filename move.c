@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include "drag.h"
+#include "mouse.h"
 #include "main.h"
 #include "move.h"
 #include "animate.h"

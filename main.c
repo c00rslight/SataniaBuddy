@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "main.h"
-#include "drag.h"
+#include "mouse.h"
 #include "move.h"
 #include "animate.h"
 

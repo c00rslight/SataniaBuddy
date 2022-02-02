@@ -1,7 +1,7 @@
 BIN=satania
 CC=gcc
 CFLAGS=-O2 `pkg-config --cflags x11 cairo`
-OBJ=main.o move.o drag.o animate.o
+OBJ=main.o move.o mouse.o animate.o
 LDFLAGS=`pkg-config --libs x11 cairo` -pthread
 DEPS=Makefile
 
