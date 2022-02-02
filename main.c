@@ -10,12 +10,12 @@
 #include <stdio.h>
 #include <string.h>
 
-/*
- * TODO
- *  search for files in other locations, not just the current directory
- *  movement
- *  actions
- */
+#include "main.h"
+#include "drag.h"
+#include "move.h"
+#include "animate.h"
+
+int deskw, deskh;
 
 int window_h;
 int window_w;
@@ -23,60 +23,14 @@ int window_w;
 int MoveIntervalStart;
 int MoveIntervalStop;
 int Move;
+int SitY;
 
-int mouse_drag;
-int dragx, dragy;
-int deskw, deskh;
-
-void handle_mousemotion(XEvent *xe, Display *dpy, Window w)
-{
-	if (!mouse_drag) return;
-
-	// could probably be optimized
-	XWindowAttributes xwa;
-	XGetWindowAttributes(dpy, w, &xwa);
-	int newx = xwa.x - (dragx - xe->xbutton.x);
-	int newy = xwa.y - (dragy - xe->xbutton.y);
-	XMoveWindow(dpy, w, newx, newy);
-}
-
-void handle_btn_down(XEvent *xe)
-{
-	if (xe->xbutton.button == Button1) {
-		mouse_drag = 1;
-		dragx = xe->xbutton.x;
-		dragy = xe->xbutton.y;
-	}
-}
-
-void handle_btn_up(XEvent *xe)
-{
-	if (xe->xbutton.button == Button1) mouse_drag = 0;
-}
-
-int start_move;
-
-void move(Display *dpy, Window w)
-{
-	if (mouse_drag) { start_move = 0; return; }
-	else if (!start_move || !Move) return;
-
-	int newx = rand() % (deskw - window_w);
-	int newy = rand() % (deskh - window_h);
-	XMoveWindow(dpy, w, newx, newy);
-
-	start_move = 0;
-}
-
-void *move_thread(void *p)
-{
-	for (;;) {
-		int sleep_amt = (rand() % (MoveIntervalStop - MoveIntervalStart
-					+ 1)) + MoveIntervalStart;
-		sleep(sleep_amt);
-		start_move = 1;
-	}
-}
+/*
+ * TODO
+ *  search for files in other locations, not just the current directory
+ *  movement
+ *  actions
+ */
 
 void read_config()
 {
@@ -86,6 +40,7 @@ void read_config()
 	Move = 1;
 	MoveIntervalStart = 1;
 	MoveIntervalStop  = 2;
+	SitY = 148;
 	
 	FILE *fp = fopen("satania.cfg", "r");
 	if (!fp) return;
@@ -104,6 +59,8 @@ void read_config()
 			if (strcasecmp(value, "true\n") == 0) Move = 1;
 			else Move = 0;
 		}
+		else if (strcmp(key, "SitY") == 0)
+			SitY = atoi(value);
 	}
 
 	free(str);
@@ -186,6 +143,7 @@ int main(void)
 		}
 
 		move(dpy, w);
+		animate(dpy, w);
 
 		if (fds > 0) {
 			gettimeofday(&after, NULL);
